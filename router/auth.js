@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get("/",  (req, res) => {
   try {
-    res.json({message: "Mensaje de prueba"})
+    res.json({message: "Mensaje de prueba, Soy Pablo"})
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
