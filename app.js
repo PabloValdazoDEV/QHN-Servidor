@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const PORT = 5000;
+const PORT = 3000;
 const router = require("./router");
 const methodOverride = require("method-override");
 const corsConfig = require('./config/corsConfig')
@@ -21,3 +21,4 @@ app.listen(PORT, () => {
     `El servidor esta activo y esta escuchando por el puerto ${PORT}`
   );
 });
+
