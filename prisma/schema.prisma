@@ -19,4 +19,13 @@ model User{
     name String
     password String
     role Role @default(CUSTOMER)
+    error_logins ErrorLogin[]
+    verified Boolean @default(false)
+}
+
+model ErrorLogin {
+    id String @id @unique @default(uuid())
+    user_id String
+    user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+    date_try DateTime @default(now())
 }
