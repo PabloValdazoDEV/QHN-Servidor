@@ -7,25 +7,64 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-enum Role{
+enum Role {
     ADMIN
-    CUSTOMER
     COLLABORATOR
 }
 
-model User{
-    id String @id @unique @default(uuid())
-    email String @unique
-    name String
-    password String
-    role Role @default(CUSTOMER)
+model User {
+    id           String       @id @unique @default(uuid())
+    email        String       @unique
+    name         String
+    password     String
+    role         Role         @default(COLLABORATOR)
     error_logins ErrorLogin[]
-    verified Boolean @default(false)
+    verified     Boolean      @default(false)
 }
 
 model ErrorLogin {
-    id String @id @unique @default(uuid())
-    user_id String
-    user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+    id       String   @id @unique @default(uuid())
+    user_id  String
+    user     User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
     date_try DateTime @default(now())
+}
+
+model Usuario {
+    id              String     @id @unique @default(uuid())
+    email           String?
+    nombre_usuario  String?
+    edad_usuario    Int[]
+    edad_familiares String?
+    integrantes     Int?
+    discapacidad    String?
+    interes         String?
+    ubicacion       String?
+    registros       Registro[]
+}
+
+model Evento {
+    id            Int        @id @default(autoincrement())
+    nombre_evento String
+    image         String
+    ubicacion     String?
+    fecha         DateTime?
+    categoria     String?
+    discapacidad  String?
+    integrantes   Int?
+    edades        String?
+    modalidades   String?
+    precio        Int
+    content       String // Que llevara HTML Puro y Duro
+    createdAt     DateTime   @default(now())
+    updatedAt     DateTime   @updatedAt
+    registros     Registro[]
+}
+
+model Registro {
+    id_historial_usuario Int     @id @default(autoincrement())
+    id_usuario           String
+    usuario              Usuario @relation(fields: [id_usuario], references: [id], onDelete: Cascade)
+    id_evento            Int
+    evento               Evento  @relation(fields: [id_evento], references: [id], onDelete: Cascade)
+    interaccion          Boolean @default(false)
 }
