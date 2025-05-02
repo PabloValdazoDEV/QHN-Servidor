@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS;
+const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'];
 
 const corsConfig = {
   origin: function (origin, callback) {
@@ -20,8 +20,7 @@ const corsConfig = {
     "User-Agent",
   ],
   credentials: true,
-  preflightContinue: false,
-  optionsSuccessStatus: 204,
+  optionsSuccessStatus: 200
 };
 
 module.exports = corsConfig;

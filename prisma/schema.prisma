@@ -4,19 +4,38 @@ generator client {
 
 datasource db {
     provider = "postgresql"
-    url      = env("DATABASE_URL")
+    url      = "postgresql://postgres:Contraseña@localhost:5432/db_qhn?schema=public"
 }
 
-enum Role{
+enum Role {
     ADMIN
-    CUSTOMER
     COLLABORATOR
+    NEWSLETTER_USER
 }
 
-model User{
+model User {
     id String @id @unique @default(uuid())
     email String @unique
     name String
-    password String
-    role Role @default(CUSTOMER)
+    password String?
+    role Role @default(NEWSLETTER_USER)
+    entity String?
+    isActive Boolean @default(true)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Event {
+    id        String   @id @default(uuid())
+    title     String
+    entity    String
+    info      String
+    category  String
+    ageRange  String
+    city      String
+    images    String[]
+    comments  String?
+    createdBy String
+    createdAt DateTime @default(now())
+    validated Boolean  @default(false)
 }
