@@ -58,6 +58,12 @@ router.post("/login", async (req, res) => {
         .json({ message: "Ese correo no esta registrado." });
     }
 
+    if(!user.verified){
+      return res
+      .status(401)
+      .json({ message: "Este correo no esta validado por la organización" });
+    }
+
     const ahora = DateTime.now().setZone("Europe/Madrid");
 
     const haceDiezMinutos = ahora.minus({ minutes: 10 }).toJSDate();
@@ -109,7 +115,7 @@ router.post("/login", async (req, res) => {
       },
       process.env.JWT_SECRET,
       {
-        expiresIn: "1h",
+        expiresIn: "30d",
       }
     );
 

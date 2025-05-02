@@ -20,6 +20,7 @@ model User {
     role         Role         @default(COLLABORATOR)
     error_logins ErrorLogin[]
     verified     Boolean      @default(false)
+    eventos      Evento[]
 }
 
 model ErrorLogin {
@@ -44,6 +45,8 @@ model Usuario {
 
 model Evento {
     id            Int        @id @default(autoincrement())
+    slug          String     @unique
+    id_user       String
     nombre_evento String
     image         String
     ubicacion     String?
@@ -53,11 +56,13 @@ model Evento {
     integrantes   Int?
     edades        String?
     modalidades   String?
-    precio        Int
+    precio        Int?
     content       String // Que llevara HTML Puro y Duro
     createdAt     DateTime   @default(now())
     updatedAt     DateTime   @updatedAt
     registros     Registro[]
+    verified      Boolean    @default(false)
+    user          User       @relation(fields: [id_user], references: [id], onDelete: Cascade)
 }
 
 model Registro {
