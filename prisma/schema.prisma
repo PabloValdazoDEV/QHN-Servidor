@@ -65,7 +65,7 @@ model Evento {
     updatedAt     DateTime   @updatedAt
     registros     Registro[]
     verified      Boolean    @default(false)
-    user          User       @relation(fields: [id_user], references: [id], onDelete: Cascade)
+    user          User       @relation(fields: [id_user], references: [id])
 }
 
 model Registro {

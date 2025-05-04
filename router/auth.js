@@ -385,5 +385,48 @@ router.put("/users/password/:id", authMiddleware, async (req, res) => {
   }
 });
 
+router.put("/user/delete/:id", authMiddleware, async (req, res) => {
+
+  console.log(req.body)
+  const { id } = req.params;
+  const { idNewUser } = req.body;
+
+  if(id === idNewUser){
+    return res.status(400).json({ message: "Es el mismo usuario." });
+  }
+
+  console.log(id, idNewUser )
+
+  try {
+    if (!idNewUser) {
+      return res.status(400).json({ message: "Debes proporcionar el ID del nuevo usuario." });
+    }
+
+    const newUserExists = await prisma.user.findUnique({
+      where: { id: idNewUser },
+    });
+
+    if (!newUserExists) {
+      return res.status(404).json({ message: "El nuevo usuario no existe." });
+    }
+
+    const updateResult = await prisma.evento.updateMany({
+      where: { id_user: id },
+      data: { id_user: idNewUser },
+    });
+
+    console.log(`Eventos reasignados: ${updateResult.count}`);
+
+    await prisma.user.delete({
+      where: { id },
+    });
+
+    return res.json({ message: "Usuario eliminado y eventos reasignados con éxito." });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Error interno del servidor", error });
+  }
+});
+
 
 module.exports = router;
