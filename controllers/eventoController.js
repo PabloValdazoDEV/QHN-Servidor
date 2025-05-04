@@ -2,6 +2,7 @@ const prisma = require("../prisma/prisma");
 const path = require("path");
 const fs = require("fs");
 const sharp = require("sharp");
+const { verify } = require("crypto");
 
 const createEvento = async (req, res) => {
   try {
@@ -47,78 +48,76 @@ const createEvento = async (req, res) => {
 };
 
 const getEventos = async (req, res) => {
-    const { page = 1, evento } = req.query;
-    const salto = 10 * (page - 1);
-  
-    const filter = evento
-      ? {
-          nombre_evento: {
-            contains: evento,
-            mode: "insensitive",
-          },
-        }
-      : {};
-  
-    try {
-      const [eventos, total] = await Promise.all([
-        prisma.evento.findMany({
-          where: filter,
-          include: {user:true},
-          orderBy: { createdAt: "desc" },
-          skip: salto,
-          take: 10,
-        }),
-        prisma.evento.count({ where: filter }),
-      ]);
-  
-      res.json({ eventos, total });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Error obteniendo eventos" });
-    }
-  };
+  const { page = 1, evento } = req.query;
+  const salto = 10 * (page - 1);
+
+  const filter = evento
+    ? {
+        nombre_evento: {
+          contains: evento,
+          mode: "insensitive",
+        },
+      }
+    : {};
+
+  try {
+    const [eventos, total] = await Promise.all([
+      prisma.evento.findMany({
+        where: filter,
+        include: { user: true },
+        orderBy: { createdAt: "desc" },
+        skip: salto,
+        take: 10,
+      }),
+      prisma.evento.count({ where: filter }),
+    ]);
+
+    res.json({ eventos, total });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error obteniendo eventos" });
+  }
+};
 
 const getEventosCollaborator = async (req, res) => {
-    const { id } = req.params
-    const { page = 1, evento } = req.query;
-    const salto = 10 * (page - 1);
-  
-    const filter = {
-        AND: [
-          evento
-            ? {
-                nombre_evento: {
-                  contains: evento,
-                  mode: "insensitive",
-                },
-              }
-            : {},
-          {
-            id_user: id,
-          },
-        ],
-      };
-      
-  
-    try {
-      const [eventos, total] = await Promise.all([
-        prisma.evento.findMany({
-          where: filter,
-          include: {user:true},
-          orderBy: { createdAt: "desc" },
-          skip: salto,
-          take: 10,
-        }),
-        prisma.evento.count({ where: filter }),
-      ]);
-  
-      res.json({ eventos, total });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Error obteniendo eventos" });
-    }
+  const { id } = req.params;
+  const { page = 1, evento } = req.query;
+  const salto = 10 * (page - 1);
+
+  const filter = {
+    AND: [
+      evento
+        ? {
+            nombre_evento: {
+              contains: evento,
+              mode: "insensitive",
+            },
+          }
+        : {},
+      {
+        id_user: id,
+      },
+    ],
   };
-  
+
+  try {
+    const [eventos, total] = await Promise.all([
+      prisma.evento.findMany({
+        where: filter,
+        include: { user: true },
+        orderBy: { createdAt: "desc" },
+        skip: salto,
+        take: 10,
+      }),
+      prisma.evento.count({ where: filter }),
+    ]);
+
+    res.json({ eventos, total });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error obteniendo eventos" });
+  }
+};
 
 const uploadEventoImage = async (req, res) => {
   const file = req.file;
@@ -310,18 +309,42 @@ const getEventCategory = async (req, res) => {
 
 const getEventSlug = async (req, res) => {
   const { city, category, slug } = req.params;
+  const formarCategory =
+  category === "educacion" ? "Educación" : category.replaceAll("-", " ");
+
   try {
     const data = await prisma.evento.findUnique({
       where: {
         slug: `${city}/${category}/${slug}`,
         verified: true,
       },
+      include:{
+        user: true
+      }
     });
+
+    const moreOption = await prisma.evento.findMany({
+        where: {
+          NOT: {
+            id: data.id,
+          },
+          ubicacion: {
+            contains: city,
+            mode: "insensitive",
+          },
+          categoria: {
+            contains: formarCategory,
+            mode: "insensitive",
+          },
+          verified: true,
+        },
+        take: 3,
+      });
     if (!data) {
       return res.status(404).json({ message: "No hay evento" });
     }
 
-    res.status(200).json(data);
+    res.status(200).json({ post: data, moreOptions: moreOption });
   } catch (error) {
     console.error(error);
     res
@@ -362,12 +385,83 @@ const updateEventVerified = async (req, res) => {
     });
     res.status(200).json({ message: "Evento Verificado" });
   } catch (error) {
-    console.error(error);
     res
       .status(500)
       .json({ message: `Error al validar el evento con la ID: ${id}` });
   }
 };
+
+const getAllEventUserMore = async (req, res) => {
+  const { id } = req.params;
+  const { page = 1, evento } = req.query;
+  const salto = 10 * (page - 1);
+
+  const filter = {
+    evento: {
+      nombre_evento: {
+        contains: evento,
+        mode: "insensitive",
+      },
+      verified: true
+    },
+  };
+
+  try {
+    const [eventos, total] = await Promise.all([
+      prisma.evento.findMany({
+        where: filter,
+        orderBy: { createdAt: "desc" },
+        skip: salto,
+        take: 10,
+      }),
+      prisma.evento.count({ where: filter }),
+    ]);
+
+    res.json({ eventos, total });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error obteniendo eventos" });
+  }
+};
+
+const getAllEventUser = async (req, res) => {
+    try {
+      const response = await prisma.evento.findMany({
+        where: {
+          verified: true
+        },
+        take: 9,
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+  
+      res.json(response);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Error obteniendo eventos" });
+    }
+  };
+
+const getAllEventUserLast = async (req, res) => {
+    try {
+      const response = await prisma.evento.findMany({
+        where: {
+          verified: true
+        },
+        take: 24,
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+  
+      res.json(response);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Error obteniendo eventos" });
+    }
+  };
+  
 
 module.exports = {
   createEvento,
@@ -381,5 +475,8 @@ module.exports = {
   getEventSlug,
   deleteEvent,
   updateEventVerified,
-  getEventosCollaborator
+  getEventosCollaborator,
+  getAllEventUserMore,
+  getAllEventUser,
+  getAllEventUserLast
 };

@@ -17,10 +17,13 @@ model User {
     email        String       @unique
     name         String
     password     String
+    entity       String?
     role         Role         @default(COLLABORATOR)
     error_logins ErrorLogin[]
     verified     Boolean      @default(false)
     eventos      Evento[]
+    createdAt    DateTime     @default(now())
+    updatedAt    DateTime     @updatedAt
 }
 
 model ErrorLogin {

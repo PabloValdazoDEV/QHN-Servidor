@@ -13,9 +13,11 @@ const {
   getEventSlug,
   deleteEvent,
   updateEventVerified,
-  getEventosCollaborator
+  getEventosCollaborator,
+  getAllEventUser,
+  getAllEventUserLast
 } = require("../controllers/eventoController.js");
-const authMiddleware = require("../middelwares");
+const authMiddleware = require("../middelwares/authMiddleware");
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.get("/ciudad/:city", getEventCity);
@@ -23,6 +25,8 @@ router.get("/ciudad/:city/:category", getEventCityCategory);
 router.get("/categoria/:category", getEventCategory);
 router.get("/event/:city/:category/:slug", getEventSlug);
 router.put("/verified/:id", authMiddleware, updateEventVerified);
+router.get("/user/last", getAllEventUserLast);
+router.get("/user", getAllEventUser);
 router.put("/:id", authMiddleware, updateEvento);
 router.delete("/:id", authMiddleware, deleteEvent);
 router.post("/", authMiddleware, createEvento);
