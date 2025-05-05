@@ -61,7 +61,7 @@ async function main() {
 
   // Crear eventos
   const eventos = [];
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 200; i++) {
     const nombre = faker.lorem.words(4);
     const ubicacion = faker.helpers.arrayElement([
       'Madrid',
@@ -106,7 +106,7 @@ async function main() {
         ]),
         precio: faker.number.int({ min: 0, max: 100 }),
         content: `<h1>${faker.lorem.words(3)}</h1><p>${faker.lorem.paragraph()}</p>`,
-        verified: faker.datatype.boolean(),
+        verified: true,
       },
     });
 
