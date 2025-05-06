@@ -59,13 +59,13 @@ model Evento {
     integrantes   Int?
     edades        String?
     modalidades   String?
-    precio        Int?
+    precio        String?
     content       String // Que llevara HTML Puro y Duro
     createdAt     DateTime   @default(now())
     updatedAt     DateTime   @updatedAt
     registros     Registro[]
     verified      Boolean    @default(false)
-    user          User       @relation(fields: [id_user], references: [id])
+    user          User       @relation(fields: [id_user], references: [id], onDelete: Restrict)
 }
 
 model Registro {
