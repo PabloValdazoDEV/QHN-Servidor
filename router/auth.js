@@ -185,31 +185,25 @@ router.get("/me", authMiddleware, async (req, res) => {
 router.post("/newsletter", async (req, res) => {
   const { email, name } = req.body;
 
+  if (!email) {
+    return res.status(400).json({ message: "El email es obligatorio" });
+  }
+
   try {
-    if (!email || !name) {
-      return res.status(400).json({ message: "Email y nombre son requeridos" });
-    }
-
-    const existingUser = await prisma.user.findUnique({ where: { email } });
-    if (existingUser) {
-      return res.status(400).json({ message: "El email ya está registrado" });
-    }
-
     const user = await prisma.user.create({
       data: {
         email,
-        name,
-        role: "COLLABORATOR",
-        verified: false,
+        name, 
       },
     });
 
-    res.json({ message: "Suscripción a newsletter exitosa" });
+    res.status(201).json(user);
   } catch (error) {
-    console.error(error);
+    console.error("Error al guardar suscripción:", error);
     res.status(500).json({ message: "Error interno del servidor" });
   }
 });
+
 
 router.put("/users/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
