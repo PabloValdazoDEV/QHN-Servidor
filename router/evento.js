@@ -15,7 +15,7 @@ const {
   updateEventVerified,
   getEventosCollaborator,
   getAllEventUser,
-  getAllEventUserLast
+  getAllEventUserLast,
 } = require("../controllers/eventoController.js");
 const authMiddleware = require("../middelwares/authMiddleware");
 const upload = multer({ storage: multer.memoryStorage() });
@@ -30,9 +30,9 @@ router.get("/user", getAllEventUser);
 router.put("/:id", authMiddleware, updateEvento);
 router.delete("/:id", authMiddleware, deleteEvent);
 router.post("/", authMiddleware, createEvento);
-router.get("/", getEventos);
-router.get("/collaborator/:id", getEventosCollaborator);
-router.get("/:id", getEventoById);
+router.get("/", authMiddleware, getEventos);
+router.get("/collaborator/:id",authMiddleware, getEventosCollaborator);
+router.get("/:id",authMiddleware, getEventoById);
 router.post(
   "/upload",
   authMiddleware,
